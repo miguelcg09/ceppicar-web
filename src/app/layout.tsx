@@ -15,10 +15,7 @@ const display = Roboto_Condensed({ subsets: ["latin"], variable: "--font-display
 export const dynamic = "force-dynamic";
 
 export const viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#0f2a4d" },
-    { media: "(prefers-color-scheme: dark)", color: "#1a1d22" },
-  ],
+  themeColor: "#1e4fbf",
 };
 
 export async function generateMetadata(): Promise<Metadata> {

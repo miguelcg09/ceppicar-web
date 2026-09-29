@@ -26,16 +26,16 @@
 
 :root {
   color-scheme: light;
-  --bg: #f4f6f9;
+  --bg: #f7f9fc;
   --surface: #ffffff;
-  --surface-2: #e9eef5;
-  --tile: #e6f2fb;
-  --line: rgb(15 40 80 / 0.14);
-  --fg: #1a1f2b;
-  --muted: #5b6472;
-  --accent: #0b3d91;
-  --accent-2: #1e63d6;
-  --navy: #0f2a4d;
+  --surface-2: #edf2f9;
+  --tile: #e8f3fc;
+  --line: rgb(15 40 80 / 0.12);
+  --fg: #1c2230;
+  --muted: #5f6b7d;
+  --accent: #1d5fd6;
+  --accent-2: #3b82f6;
+  --navy: #1e4fbf;
   --on-navy: #ffffff;
   --cta: #ffc107;
   --on-cta: #1a1f2b;
@@ -43,33 +43,9 @@
   --warn: #b45309;
   --tint: #1a1f2b;
   --on-accent: #ffffff;
-  --glow: 11 61 145;
+  --glow: 29 95 214;
 }
 
-@media (prefers-color-scheme: dark) {
-  /* Modo oscuro en grises grafito: el azul queda solo en enlaces y detalles, el amarillo en los botones. */
-  :root {
-    color-scheme: dark;
-    --bg: #131517;
-    --surface: #1c1f23;
-    --surface-2: #272b31;
-    --tile: #2a2e34;
-    --line: rgb(255 255 255 / 0.12);
-    --fg: #ececee;
-    --muted: #a3a8b0;
-    --accent: #6ea8ff;
-    --accent-2: #8fbcff;
-    --navy: #1a1d22;
-    --on-navy: #f2f2f2;
-    --cta: #ffc107;
-    --on-cta: #1a1f2b;
-    --ok: #5fcf8c;
-    --warn: #f1c460;
-    --tint: #f2f2f2;
-    --on-accent: #ffffff;
-    --glow: 110 168 255;
-  }
-}
 
 html { scroll-behavior: smooth; }
 body { background: var(--color-bg); color: var(--color-fg); }
@@ -138,7 +114,7 @@ body { background: var(--color-bg); color: var(--color-fg); }
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  background: #0b1e3a;
+  background: linear-gradient(115deg, #1e4fbf 0%, #2f6fe0 55%, #4a8cf5 100%);
   color: #ffffff;
 }
 .hero::before {
@@ -146,8 +122,8 @@ body { background: var(--color-bg); color: var(--color-fg); }
   position: absolute;
   inset: -20%;
   z-index: -2;
-  opacity: 0.35;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='104' viewBox='0 0 120 104'%3E%3Cg fill='none' stroke='%237fb0ff' stroke-opacity='.35' stroke-width='1.2'%3E%3Cpath d='M30 2 58 17v30L30 62 2 47V17zM90 54l28 15v30L90 114 62 99V69z'/%3E%3Ccircle cx='30' cy='32' r='6'/%3E%3Ccircle cx='90' cy='84' r='6'/%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='104' viewBox='0 0 120 104'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.28' stroke-width='1.2'%3E%3Cpath d='M30 2 58 17v30L30 62 2 47V17zM90 54l28 15v30L90 114 62 99V69z'/%3E%3Ccircle cx='30' cy='32' r='6'/%3E%3Ccircle cx='90' cy='84' r='6'/%3E%3C/g%3E%3C/svg%3E");
   animation: drift 60s linear infinite;
 }
 .hero::after {
@@ -156,24 +132,14 @@ body { background: var(--color-bg); color: var(--color-fg); }
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(ellipse 60% 80% at 80% 50%, rgb(30 99 214 / 0.35), transparent 70%),
-    linear-gradient(90deg, #0b1e3a 0%, rgb(11 30 58 / 0.92) 45%, rgb(11 30 58 / 0.6) 100%),
-    linear-gradient(180deg, transparent 60%, rgb(0 0 0 / 0.35));
+    radial-gradient(ellipse 50% 70% at 85% 40%, rgb(255 255 255 / 0.18), transparent 70%),
+    linear-gradient(90deg, rgb(20 60 160 / 0.55) 0%, transparent 60%),
+    linear-gradient(180deg, transparent 70%, rgb(0 0 0 / 0.18));
 }
 .hero .field { background: #ffffff; color: #1a1f2b; border-color: transparent; }
-@media (prefers-color-scheme: dark) {
-  .hero { background: #1a1d22; }
-  .hero::before { opacity: 0.18; }
-  .hero::after {
-    background:
-      radial-gradient(ellipse 60% 80% at 80% 50%, rgb(255 193 7 / 0.10), transparent 70%),
-      linear-gradient(90deg, #1a1d22 0%, rgb(26 29 34 / 0.92) 45%, rgb(26 29 34 / 0.6) 100%),
-      linear-gradient(180deg, transparent 60%, rgb(0 0 0 / 0.35));
-  }
-}
 
 /* Pestañas del buscador de vehículo */
-.tab { border-bottom: 3px solid transparent; padding: 0.75rem 1rem; font-weight: 600; color: rgb(255 255 255 / 0.7); }
+.tab { border-bottom: 3px solid transparent; padding: 0.75rem 1rem; font-weight: 600; color: rgb(255 255 255 / 0.75); }
 .tab[aria-selected="true"] { color: #ffffff; border-color: var(--color-cta); }
 
 /* Bandas de sección */
@@ -208,9 +174,6 @@ body { background: var(--color-bg); color: var(--color-fg); }
 .tabular { font-variant-numeric: tabular-nums; }
 
 /* Las ilustraciones usan colores pensados para fondo claro; en oscuro se aclaran para mantener contraste. */
-@media (prefers-color-scheme: dark) {
-  .part-icon { filter: brightness(1.7) saturate(0.85); }
-}
 
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after { animation: none !important; transition: none !important; }
