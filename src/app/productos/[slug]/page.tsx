@@ -7,6 +7,7 @@ import { getSettings } from "@/lib/settings";
 import { ProductImage } from "@/components/ProductImage";
 import { AddToCart } from "@/components/AddToCart";
 import { FitBadge, ProductCard } from "@/components/ProductCard";
+import { MLLogo } from "@/components/MLLogo";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -87,6 +88,7 @@ export default async function ProductPage({ params }: Props) {
             <AddToCart product={product} />
             {ml && (
               <a href={ml} target="_blank" rel="noopener" className="btn-ml mt-3 w-full text-sm">
+                <MLLogo className="h-6" />
                 {product.active ? "Comprar en Mercado Libre ↗" : "Ver en Mercado Libre ↗"}
               </a>
             )}

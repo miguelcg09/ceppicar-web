@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useStore } from "./CartProvider";
 
@@ -18,6 +18,7 @@ export function VehicleFinder({
 }) {
   const { vehicles, vehicle, setVehicle } = useStore();
   const router = useRouter();
+  const pathname = usePathname();
   const [v, setV] = useState<V>(vehicle);
 
   const makes = Object.keys(vehicles).sort();
@@ -34,6 +35,13 @@ export function VehicleFinder({
     if (v.model) q.set("modelo", v.model);
     if (v.year) q.set("ano", String(v.year));
     router.push(`/productos?${q}`);
+    onDone?.();
+  }
+
+  function clear() {
+    setV({});
+    setVehicle({});
+    if (pathname.startsWith("/productos")) router.push("/productos");
     onDone?.();
   }
 
@@ -66,10 +74,17 @@ export function VehicleFinder({
           {years.map((y) => <option key={y} value={y}>{y}</option>)}
         </select>
       </label>
-      <button type="submit" disabled={!v.make} className={`btn-cta ${compact ? "py-2 text-sm" : "py-3 px-6"} col-span-2 md:col-span-1`}>
-        Buscar
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M9 6l6 6-6 6" /></svg>
-      </button>
+      <div className="col-span-2 flex gap-2 md:col-span-1">
+        <button type="submit" disabled={!v.make} className={`btn-cta grow ${compact ? "py-2 text-sm" : "py-3 px-6"}`}>
+          Buscar
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M9 6l6 6-6 6" /></svg>
+        </button>
+        {(v.make || vehicle.make) && (
+          <button type="button" onClick={clear} className={`btn-ghost ${compact ? "py-2 text-sm" : "py-3"} px-4`} title="Quitar el vehículo">
+            Limpiar
+          </button>
+        )}
+      </div>
     </form>
   );
 }

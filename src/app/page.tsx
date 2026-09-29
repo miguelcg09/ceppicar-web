@@ -7,6 +7,7 @@ import { CategoryRail } from "@/components/CategoryRail";
 import { HeroFinder } from "@/components/HeroFinder";
 import { PromoCarousel, type Slide } from "@/components/PromoCarousel";
 import { Reveal } from "@/components/Reveal";
+import { MLLogo } from "@/components/MLLogo";
 
 const buySteps = [
   { title: "Elige tu auto", text: "Marca, modelo y año. Te mostramos solo lo que le sirve." },
@@ -47,7 +48,7 @@ export default async function Home() {
   const slides: Slide[] = [
     { kicker: "Envío gratis", title: `${freeCount} repuestos con envío gratis a todo Chile`, text: "Sin mínimo de compra en los productos marcados. El resto, gratis sobre " + formatCLP(settings.freeShippingFrom) + ".", cta: "Ver catálogo", href: "/productos", tone: "navy" },
     { kicker: "Retiro en tienda", title: "Retíralo hoy en La Cisterna", text: "Compra en línea, coordina por WhatsApp y pasa a buscarlo. Sin costo de envío.", cta: "Cómo comprar", href: "/#como-comprar", tone: "blue" },
-    { kicker: "También en Mercado Libre", title: "MercadoLíder Platinum", text: "Si prefieres, compra la misma pieza en nuestra tienda de Mercado Libre con Mercado Envíos.", cta: "Ir a Mercado Libre", href: settings.mlUrl || "/productos", tone: "yellow" },
+    { kicker: "Tienda oficial en Mercado Libre", title: "Repuestos Ceppicar, MercadoLíder Platinum", text: "Si prefieres, compra la misma pieza en nuestra tienda de Mercado Libre con Mercado Envíos y la protección al comprador.", cta: "Ver tienda Repuestos Ceppicar", href: settings.mlUrl || "/productos", tone: "yellow", badge: <MLLogo className="h-9 rounded-full ring-2 ring-white" /> },
   ];
 
   return (

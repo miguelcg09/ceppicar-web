@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-export type Slide = { kicker: string; title: string; text: string; cta: string; href: string; tone: "navy" | "blue" | "yellow" };
+export type Slide = { kicker: string; title: string; text: string; cta: string; href: string; tone: "navy" | "blue" | "yellow"; badge?: React.ReactNode };
 
 const tones: Record<Slide["tone"], string> = {
   navy: "bg-navy text-white",
@@ -31,7 +31,10 @@ export function PromoCarousel({ slides, external }: { slides: Slide[]; external?
           {slides.map((s) => (
             <div key={s.title} className={`slide ${tones[s.tone]}`}>
               <div className="flex min-h-56 flex-col justify-center gap-3 px-8 py-10 md:px-14">
-                <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-80">{s.kicker}</p>
+                <div className="flex items-center gap-3">
+                  {s.badge}
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] opacity-80">{s.kicker}</p>
+                </div>
                 <p className="max-w-2xl font-display text-3xl font-bold leading-tight md:text-5xl">{s.title}</p>
                 <p className="max-w-xl opacity-85">{s.text}</p>
                 {external && s.href.startsWith("http") ? (

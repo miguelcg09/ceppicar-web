@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Settings } from "@/lib/config";
 import { categories, categoryMeta } from "@/lib/products";
+import { MLLogo } from "./MLLogo";
 
 export function Footer({ settings }: { settings: Settings }) {
   return (
@@ -10,8 +11,9 @@ export function Footer({ settings }: { settings: Settings }) {
           <p className="font-display text-2xl font-bold">CEPPI<span className="text-cta">CAR</span></p>
           <p className="mt-2 text-sm text-white/70">{settings.tagline}</p>
           {settings.mlUrl && (
-            <a href={settings.mlUrl} target="_blank" rel="noopener" className="mt-4 inline-block rounded-md bg-[#ffe600] px-3 py-1.5 text-sm font-semibold text-[#2d3277]">
-              Nuestra tienda en Mercado Libre ↗
+            <a href={settings.mlUrl} target="_blank" rel="noopener" className="mt-4 inline-flex items-center gap-3 rounded-lg bg-white/10 p-2 pr-4 text-sm font-semibold hover:bg-white/15">
+              <MLLogo className="h-9" />
+              <span>Repuestos Ceppicar<br /><span className="text-xs font-normal text-white/70">Tienda oficial en Mercado Libre ↗</span></span>
             </a>
           )}
         </div>
