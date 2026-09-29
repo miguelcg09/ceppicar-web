@@ -47,26 +47,27 @@
 }
 
 @media (prefers-color-scheme: dark) {
+  /* Modo oscuro en grises grafito: el azul queda solo en enlaces y detalles, el amarillo en los botones. */
   :root {
     color-scheme: dark;
-    --bg: #0c1220;
-    --surface: #141c2c;
-    --surface-2: #1b2538;
-    --tile: #1a2a40;
-    --line: rgb(140 170 220 / 0.16);
-    --fg: #e8eef7;
-    --muted: #97a4b8;
-    --accent: #3b7ce0;
-    --accent-2: #5f9bff;
-    --navy: #0a1b33;
-    --on-navy: #ffffff;
+    --bg: #131517;
+    --surface: #1c1f23;
+    --surface-2: #272b31;
+    --tile: #2a2e34;
+    --line: rgb(255 255 255 / 0.12);
+    --fg: #ececee;
+    --muted: #a3a8b0;
+    --accent: #6ea8ff;
+    --accent-2: #8fbcff;
+    --navy: #1a1d22;
+    --on-navy: #f2f2f2;
     --cta: #ffc107;
     --on-cta: #1a1f2b;
     --ok: #5fcf8c;
     --warn: #f1c460;
-    --tint: #f2f6ff;
+    --tint: #f2f2f2;
     --on-accent: #ffffff;
-    --glow: 90 160 255;
+    --glow: 110 168 255;
   }
 }
 
@@ -159,7 +160,17 @@ body { background: var(--color-bg); color: var(--color-fg); }
     linear-gradient(90deg, #0b1e3a 0%, rgb(11 30 58 / 0.92) 45%, rgb(11 30 58 / 0.6) 100%),
     linear-gradient(180deg, transparent 60%, rgb(0 0 0 / 0.35));
 }
-.hero .field { background: var(--surface); color: #1a1f2b; border-color: transparent; }
+.hero .field { background: #ffffff; color: #1a1f2b; border-color: transparent; }
+@media (prefers-color-scheme: dark) {
+  .hero { background: #1a1d22; }
+  .hero::before { opacity: 0.18; }
+  .hero::after {
+    background:
+      radial-gradient(ellipse 60% 80% at 80% 50%, rgb(255 193 7 / 0.10), transparent 70%),
+      linear-gradient(90deg, #1a1d22 0%, rgb(26 29 34 / 0.92) 45%, rgb(26 29 34 / 0.6) 100%),
+      linear-gradient(180deg, transparent 60%, rgb(0 0 0 / 0.35));
+  }
+}
 
 /* Pestañas del buscador de vehículo */
 .tab { border-bottom: 3px solid transparent; padding: 0.75rem 1rem; font-weight: 600; color: rgb(255 255 255 / 0.7); }
@@ -195,6 +206,11 @@ body { background: var(--color-bg); color: var(--color-fg); }
 
 .shine { position: relative; }
 .tabular { font-variant-numeric: tabular-nums; }
+
+/* Las ilustraciones usan colores pensados para fondo claro; en oscuro se aclaran para mantener contraste. */
+@media (prefers-color-scheme: dark) {
+  .part-icon { filter: brightness(1.7) saturate(0.85); }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after { animation: none !important; transition: none !important; }

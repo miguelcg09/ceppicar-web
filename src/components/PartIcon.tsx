@@ -90,7 +90,7 @@ export function PartIcon({ category, color, className = "" }: { category: Catego
       strokeWidth="2.4"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={className}
+      className={`part-icon ${className}`}
       style={color ? { color } : undefined}
       aria-hidden
     >
