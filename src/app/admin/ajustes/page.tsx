@@ -20,7 +20,7 @@ export default async function Ajustes({ searchParams }: { searchParams: Promise<
           <label className="text-sm">Correo de contacto<input name="email" type="email" defaultValue={s.email} className="field" /></label>
           <label className="text-sm">WhatsApp<input name="whatsapp" defaultValue={s.whatsapp} className="field" /></label>
           <label className="text-sm sm:col-span-2">Dirección de retiro<input name="address" defaultValue={s.address} className="field" /></label>
-          <label className="text-sm sm:col-span-2">Perfil en Mercado Libre<input name="mlUrl" defaultValue={s.mlUrl} className="field" /></label>
+          <label className="text-sm sm:col-span-2">Tienda en Mercado Libre<input name="mlUrl" defaultValue={s.mlUrl} className="field" /></label>
         </fieldset>
 
         <fieldset className="grid gap-4 sm:grid-cols-2">

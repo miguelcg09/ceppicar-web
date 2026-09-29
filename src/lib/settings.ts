@@ -10,7 +10,10 @@ export async function getSettings(): Promise<Settings> {
     const wrapped = (typeof r.value === "string" ? JSON.parse(r.value) : r.value) as { v: unknown };
     (saved as Record<string, unknown>)[r.key] = wrapped.v;
   }
-  return { ...defaultSettings, ...saved };
+  const settings = { ...defaultSettings, ...saved };
+  // Si en el panel quedó guardado el antiguo enlace al perfil, usamos la tienda oficial.
+  if (settings.mlUrl === "https://www.mercadolibre.cl/perfil/CEPPICAR") settings.mlUrl = defaultSettings.mlUrl;
+  return settings;
 }
 
 export async function saveSettings(patch: Partial<Settings>) {
