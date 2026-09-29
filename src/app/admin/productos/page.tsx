@@ -33,7 +33,7 @@ export default async function Productos({ searchParams }: { searchParams: Promis
     <div>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl font-bold uppercase">Productos</h1>
+          <h1 className="font-display text-3xl font-bold">Productos</h1>
           <p className="mt-1 text-sm text-muted">
             {all.filter((p) => p.visible).length} visibles en la tienda · {all.filter((p) => !p.visible).length} ocultos (pausados en Mercado Libre).
           </p>

@@ -41,7 +41,7 @@ export default async function EditarProducto({ params }: { params: Promise<{ slu
 
   return (
     <div className="max-w-3xl">
-      <h1 className="font-display text-3xl font-bold uppercase">{isNew ? "Nuevo producto" : "Editar producto"}</h1>
+      <h1 className="font-display text-3xl font-bold">{isNew ? "Nuevo producto" : "Editar producto"}</h1>
       {!isNew && <p className="mt-1 text-sm text-muted">{product.name}</p>}
 
       <form action={saveProduct} className="mt-8 space-y-8">

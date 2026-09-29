@@ -16,7 +16,7 @@ export function AddToCart({ product }: { product: Product }) {
 
   return (
     <div>
-      <p key={variant.id} className="animate-fade font-display text-4xl font-bold text-accent">{formatCLP(variant.price)}</p>
+      <p key={variant.id} className="animate-fade font-display text-4xl font-bold">{formatCLP(variant.price)}</p>
       <p className="text-xs text-muted">IVA incluido</p>
       {product.variants.length > 1 && (
         <div className="mt-6">
@@ -52,7 +52,7 @@ export function AddToCart({ product }: { product: Product }) {
             setAdded(true);
             setTimeout(() => setAdded(false), 1500);
           }}
-          className="btn-primary flex-1"
+          className="btn-cta flex-1"
         >
           {soldOut ? "Agotado" : added ? "✓ Agregado" : "Agregar al carrito"}
         </button>

@@ -1,10 +1,12 @@
 @import "tailwindcss";
 
-/* Paleta: azul marino profundo + azul cobalto. Los tokens cambian solos según el tema claro/oscuro del visitante. */
+/* Estética de tienda de repuestos clásica (tipo carparts.com): fondo claro, barra de categorías azul marino,
+   botones de acción amarillos y tarjetas blancas con la imagen sobre celeste. */
 @theme {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
+  --color-tile: var(--tile);
   --color-line: var(--line);
   --color-fg: var(--fg);
   --color-muted: var(--muted);
@@ -12,29 +14,34 @@
   --color-accent-2: var(--accent-2);
   --color-navy: var(--navy);
   --color-on-navy: var(--on-navy);
+  --color-cta: var(--cta);
+  --color-on-cta: var(--on-cta);
   --color-ok: var(--ok);
   --color-warn: var(--warn);
   --color-tint: var(--tint);
   --color-on-accent: var(--on-accent);
   --font-sans: var(--font-sans), system-ui, sans-serif;
-  --font-display: var(--font-display), "Arial Narrow", var(--font-sans), sans-serif;
+  --font-display: var(--font-display), var(--font-sans), sans-serif;
 }
 
 :root {
   color-scheme: light;
-  --bg: #eef2f8;
+  --bg: #f4f6f9;
   --surface: #ffffff;
-  --surface-2: #e1e8f3;
-  --line: rgb(10 40 90 / 0.16);
-  --fg: #0a1830;
-  --muted: #4f5f7a;
+  --surface-2: #e9eef5;
+  --tile: #e6f2fb;
+  --line: rgb(15 40 80 / 0.14);
+  --fg: #1a1f2b;
+  --muted: #5b6472;
   --accent: #0b3d91;
-  --accent-2: #3d8bff;
-  --navy: #061a3a;
+  --accent-2: #1e63d6;
+  --navy: #0f2a4d;
   --on-navy: #ffffff;
+  --cta: #ffc107;
+  --on-cta: #1a1f2b;
   --ok: #1b7f47;
-  --warn: #a15c00;
-  --tint: #0a1830;
+  --warn: #b45309;
+  --tint: #1a1f2b;
   --on-accent: #ffffff;
   --glow: 11 61 145;
 }
@@ -42,16 +49,19 @@
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --bg: #060c18;
-    --surface: #0d1727;
-    --surface-2: #132035;
-    --line: rgb(120 160 230 / 0.16);
+    --bg: #0c1220;
+    --surface: #141c2c;
+    --surface-2: #1b2538;
+    --tile: #1a2a40;
+    --line: rgb(140 170 220 / 0.16);
     --fg: #e8eef7;
-    --muted: #8fa0ba;
-    --accent: #2f6fd6;
-    --accent-2: #5aa0ff;
-    --navy: #03102a;
+    --muted: #97a4b8;
+    --accent: #3b7ce0;
+    --accent-2: #5f9bff;
+    --navy: #0a1b33;
     --on-navy: #ffffff;
+    --cta: #ffc107;
+    --on-cta: #1a1f2b;
     --ok: #5fcf8c;
     --warn: #f1c460;
     --tint: #f2f6ff;
@@ -65,131 +75,125 @@ body { background: var(--color-bg); color: var(--color-fg); }
 
 @layer base {
   *, ::before, ::after { border-color: var(--color-line); }
-  ::selection { background: rgb(var(--glow) / 0.3); }
+  ::selection { background: rgb(var(--glow) / 0.25); }
   h1, h2, h3 { text-wrap: balance; }
 }
 
 @layer components {
-  .glass {
+  .glass, .card {
     background: var(--color-surface);
     border: 1px solid var(--color-line);
-  }
-  .text-gradient {
-    background: linear-gradient(90deg, var(--color-accent-2), #8ec5ff 80%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  .btn-primary {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
     border-radius: 0.75rem;
-    padding: 0.8rem 1.6rem;
-    font-weight: 600;
-    color: var(--on-accent);
-    background: linear-gradient(90deg, var(--color-accent), var(--color-accent-2));
-    box-shadow: 0 0 0 0 rgb(var(--glow) / 0);
-    transition: transform 0.2s, box-shadow 0.3s, filter 0.2s;
   }
-  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 10px 40px -8px rgb(var(--glow) / 0.6); }
-  .btn-primary:disabled { opacity: 0.6; transform: none; }
-  .btn-ghost {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0.75rem;
-    padding: 0.8rem 1.6rem;
-    font-weight: 500;
-    border: 1px solid color-mix(in oklab, var(--fg) 18%, transparent);
-    transition: border-color 0.2s, background 0.2s;
-  }
-  .btn-ghost:hover { border-color: var(--color-accent); background: rgb(var(--glow) / 0.06); }
+  .card-hover { transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; }
+  .card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 28px -14px rgb(15 40 80 / 0.35); border-color: color-mix(in oklab, var(--accent) 40%, var(--line)); }
+  .text-gradient { color: var(--color-cta); }
+
+  .btn-primary,
+  .btn-cta,
+  .btn-ghost,
   .btn-ml {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    border-radius: 0.75rem;
-    padding: 0.8rem 1.6rem;
-    font-weight: 600;
-    background: #ffe600;
-    color: #2d3277;
-    transition: filter 0.2s;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.4rem;
+    font-weight: 700;
+    line-height: 1.2;
+    transition: background 0.15s, border-color 0.15s, transform 0.15s, box-shadow 0.15s, filter 0.15s;
   }
-  .btn-ml:hover { filter: brightness(0.95); }
+  .btn-primary { color: var(--on-accent); background: var(--color-accent); }
+  .btn-primary:hover { background: var(--color-accent-2); }
+  .btn-primary:disabled { opacity: 0.6; }
+  .btn-cta { color: var(--on-cta); background: var(--color-cta); box-shadow: inset 0 -2px 0 rgb(0 0 0 / 0.12); }
+  .btn-cta:hover { filter: brightness(1.05); transform: translateY(-1px); box-shadow: 0 6px 16px -8px rgb(0 0 0 / 0.4), inset 0 -2px 0 rgb(0 0 0 / 0.12); }
+  .btn-cta:disabled { opacity: 0.6; transform: none; }
+  .btn-ghost { font-weight: 600; border: 1px solid color-mix(in oklab, var(--fg) 22%, transparent); background: var(--color-surface); }
+  .btn-ghost:hover { border-color: var(--color-accent); color: var(--color-accent); }
+  .btn-ml { background: #ffe600; color: #2d3277; }
+  .btn-ml:hover { filter: brightness(0.96); }
+
   .field {
     margin-top: 0.35rem;
     width: 100%;
-    border-radius: 0.75rem;
-    border: 1px solid var(--color-line);
+    border-radius: 0.5rem;
+    border: 1px solid color-mix(in oklab, var(--fg) 24%, transparent);
     background: var(--color-surface);
-    padding: 0.65rem 0.9rem;
+    padding: 0.7rem 0.9rem;
     color: var(--color-fg);
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: border-color 0.15s, box-shadow 0.15s;
   }
   .field:focus { outline: none; border-color: var(--color-accent); box-shadow: 0 0 0 3px rgb(var(--glow) / 0.15); }
   .field:disabled { opacity: 0.5; }
+  .field option { color: #1a1f2b; background: #ffffff; }
+
+  /* Imagen del producto sobre celeste, como en las tiendas de repuestos */
+  .tile { background: var(--color-tile); }
 }
 
-/* Portada azul marino con franjas diagonales en movimiento */
+/* Portada oscura con textura mecánica y viñeta; la textura se desplaza muy lento. */
 .hero {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  background: var(--color-navy);
-  color: var(--color-on-navy);
+  background: #0b1e3a;
+  color: #ffffff;
 }
 .hero::before {
   content: "";
   position: absolute;
-  inset: -40% -10%;
-  z-index: -1;
-  opacity: 0.9;
-  background: repeating-linear-gradient(115deg, transparent 0 46px, rgb(var(--glow) / 0.22) 46px 58px, transparent 58px 80px, rgb(var(--glow) / 0.12) 80px 86px);
-  animation: stripes 14s linear infinite;
+  inset: -20%;
+  z-index: -2;
+  opacity: 0.35;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='104' viewBox='0 0 120 104'%3E%3Cg fill='none' stroke='%237fb0ff' stroke-opacity='.35' stroke-width='1.2'%3E%3Cpath d='M30 2 58 17v30L30 62 2 47V17zM90 54l28 15v30L90 114 62 99V69z'/%3E%3Ccircle cx='30' cy='32' r='6'/%3E%3Ccircle cx='90' cy='84' r='6'/%3E%3C/g%3E%3C/svg%3E");
+  animation: drift 60s linear infinite;
 }
 .hero::after {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: radial-gradient(ellipse at 85% 0%, rgb(var(--glow) / 0.35), transparent 60%), linear-gradient(90deg, var(--color-navy) 30%, transparent);
+  background:
+    radial-gradient(ellipse 60% 80% at 80% 50%, rgb(30 99 214 / 0.35), transparent 70%),
+    linear-gradient(90deg, #0b1e3a 0%, rgb(11 30 58 / 0.92) 45%, rgb(11 30 58 / 0.6) 100%),
+    linear-gradient(180deg, transparent 60%, rgb(0 0 0 / 0.35));
 }
-.hero .field { background: rgb(255 255 255 / 0.08); border-color: rgb(255 255 255 / 0.25); color: var(--color-on-navy); }
-.hero .field option { color: #0a1830; background: #ffffff; }
-/* Bandas de sección: un tono apenas distinto del fondo, separadas por una línea */
-.band { background: var(--color-surface-2); border-top: 1px solid var(--color-line); border-bottom: 1px solid var(--color-line); }
+.hero .field { background: var(--surface); color: #1a1f2b; border-color: transparent; }
 
-@keyframes stripes { to { transform: translateX(172px) } }
-@keyframes float { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-14px) } }
-@keyframes marquee { from { transform: translateX(0) } to { transform: translateX(-50%) } }
-@keyframes shine { from { transform: translateX(-120%) skewX(-20deg) } to { transform: translateX(220%) skewX(-20deg) } }
+/* Pestañas del buscador de vehículo */
+.tab { border-bottom: 3px solid transparent; padding: 0.75rem 1rem; font-weight: 600; color: rgb(255 255 255 / 0.7); }
+.tab[aria-selected="true"] { color: #ffffff; border-color: var(--color-cta); }
+
+/* Bandas de sección */
+.band { background: var(--color-surface); border-top: 1px solid var(--color-line); border-bottom: 1px solid var(--color-line); }
+
+/* Carrusel de promociones */
+.slides { display: flex; transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.slide { flex: 0 0 100%; }
+.dot { width: 10px; height: 10px; border-radius: 999px; background: color-mix(in oklab, var(--fg) 25%, transparent); transition: background 0.2s, transform 0.2s; }
+.dot[aria-current="true"] { background: var(--color-fg); transform: scale(1.2); }
+
+/* Fila de categorías con desplazamiento lateral */
+.rail { display: flex; gap: 1rem; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding-bottom: 0.25rem; }
+.rail::-webkit-scrollbar { display: none; }
+.rail > * { scroll-snap-align: start; }
+
+@keyframes drift { to { transform: translate3d(-120px, -104px, 0) } }
 @keyframes drawer-in { from { transform: translateX(100%) } to { transform: translateX(0) } }
 @keyframes fade-in { from { opacity: 0 } to { opacity: 1 } }
+@keyframes pop { 0% { transform: scale(1) } 40% { transform: scale(1.25) } 100% { transform: scale(1) } }
 
-.animate-float { animation: float 6s ease-in-out infinite; }
-.animate-marquee { animation: marquee 40s linear infinite; }
-.animate-marquee:hover { animation-play-state: paused; }
 .animate-drawer { animation: drawer-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .animate-fade { animation: fade-in 0.25s ease-out; }
+.animate-pop { animation: pop 0.35s ease; }
+.animate-float { animation: none; }
 
 /* Aparición al hacer scroll (ver Reveal.tsx) */
-.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .reveal.is-visible { opacity: 1; transform: none; }
 
-/* Brillo que cruza la tarjeta al pasar el mouse */
-.shine { position: relative; overflow: hidden; }
-.shine::after {
-  content: ""; position: absolute; inset: 0; width: 40%;
-  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--tint) 8%, transparent), transparent);
-  transform: translateX(-120%) skewX(-20deg);
-  pointer-events: none;
-}
-.shine:hover::after { animation: shine 0.9s ease; }
-
+.shine { position: relative; }
 .tabular { font-variant-numeric: tabular-nums; }
 
 @media (prefers-reduced-motion: reduce) {

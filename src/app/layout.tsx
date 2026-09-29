@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Barlow_Condensed, IBM_Plex_Sans } from "next/font/google";
+import { Roboto, Roboto_Condensed } from "next/font/google";
 import "./globals.css";
 import { StoreProvider } from "@/components/CartProvider";
 import { Header } from "@/components/Header";
@@ -8,16 +8,16 @@ import { CartDrawer } from "@/components/CartDrawer";
 import { getProducts } from "@/lib/catalog";
 import { getSettings } from "@/lib/settings";
 
-const sans = IBM_Plex_Sans({ subsets: ["latin"], variable: "--font-sans", weight: ["400", "500", "600"] });
-const display = Barlow_Condensed({ subsets: ["latin"], variable: "--font-display", weight: ["600", "700", "800"] });
+const sans = Roboto({ subsets: ["latin"], variable: "--font-sans", weight: ["400", "500", "700"] });
+const display = Roboto_Condensed({ subsets: ["latin"], variable: "--font-display", weight: ["700"] });
 
 // El catálogo y los ajustes viven en la base de datos, así que todo se renderiza por petición.
 export const dynamic = "force-dynamic";
 
 export const viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#061a3a" },
-    { media: "(prefers-color-scheme: dark)", color: "#03102a" },
+    { media: "(prefers-color-scheme: light)", color: "#0f2a4d" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a1b33" },
   ],
 };
 

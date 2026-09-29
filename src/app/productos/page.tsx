@@ -55,7 +55,7 @@ export default async function Productos({ searchParams }: { searchParams: Promis
     <div className="mx-auto max-w-6xl px-4 py-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display text-4xl font-bold uppercase">
+          <h1 className="font-display text-3xl font-bold">
             {f.categoria ? categoryMeta[f.categoria as keyof typeof categoryMeta]?.name ?? "Catálogo" : "Catálogo"}
           </h1>
           <p className="mt-1 text-sm text-muted">

@@ -25,7 +25,7 @@ export default function Checkout() {
   if (lines.length === 0) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-24 text-center">
-        <h1 className="font-display text-3xl font-bold uppercase">No hay productos en tu carrito</h1>
+        <h1 className="font-display text-3xl font-bold">No hay productos en tu carrito</h1>
         <Link href="/productos" className="btn-primary mt-6">Ver catálogo</Link>
       </div>
     );
@@ -60,7 +60,7 @@ export default function Checkout() {
   return (
     <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 md:grid-cols-[1fr_360px]">
       <form onSubmit={onSubmit} className="space-y-8">
-        <h1 className="font-display text-4xl font-bold uppercase">Finalizar compra</h1>
+        <h1 className="font-display text-3xl font-bold">Finalizar compra</h1>
 
         <fieldset className="grid gap-4 sm:grid-cols-2">
           <legend className="mb-2 font-semibold">Datos de contacto</legend>

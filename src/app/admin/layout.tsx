@@ -33,7 +33,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
       <div className="mb-8 flex flex-wrap items-center gap-2 border-b pb-4">
-        <span className="mr-2 text-xs font-semibold uppercase tracking-[0.25em] text-accent">Administración</span>
+        <span className="mr-2 text-xs font-semibold uppercase tracking-widest text-accent">Administración</span>
         {nav.map((n) => (
           <Link key={n.href} href={n.href} className="rounded-full border px-4 py-1.5 text-sm hover:border-accent">
             {n.label}
