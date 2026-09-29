@@ -6,8 +6,10 @@ export const metadata: Metadata = { title: "Administración", robots: { index: f
 export const dynamic = "force-dynamic";
 
 const nav = [
+  { href: "/admin", label: "Resumen" },
   { href: "/admin/pedidos", label: "Pedidos" },
   { href: "/admin/productos", label: "Productos" },
+  { href: "/admin/mercadolibre", label: "Mercado Libre" },
   { href: "/admin/ajustes", label: "Ajustes" },
 ];
 
@@ -39,9 +41,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             {n.label}
           </Link>
         ))}
-        <form method="post" action="/admin/salir" className="ml-auto">
-          <button className="text-sm text-muted hover:text-fg">Salir</button>
-        </form>
+        <div className="ml-auto flex items-center gap-3">
+          <Link href="/" target="_blank" className="text-sm text-muted hover:text-fg">Ver tienda ↗</Link>
+          <form method="post" action="/admin/salir">
+            <button className="text-sm text-muted hover:text-fg">Salir</button>
+          </form>
+        </div>
       </div>
       {children}
     </div>

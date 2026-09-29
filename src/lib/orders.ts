@@ -136,3 +136,67 @@ export async function listOrders(limit = 100) {
   const rows = await query<OrderRow>(`SELECT * FROM orders ORDER BY created_at DESC LIMIT $1`, [limit]);
   return rows.map(toOrder);
 }
+
+// Pedidos filtrados para el panel: por estado y texto (número, nombre, correo, RUT, teléfono).
+export async function searchOrders(opts: { status?: OrderStatus | "todos"; q?: string; limit?: number } = {}) {
+  const conds: string[] = [];
+  const params: unknown[] = [];
+  if (opts.status && opts.status !== "todos") {
+    params.push(opts.status);
+    conds.push(`status = $${params.length}`);
+  }
+  if (opts.q?.trim()) {
+    params.push(`%${opts.q.trim()}%`);
+    const n = params.length;
+    conds.push(`(id ILIKE $${n} OR customer::text ILIKE $${n} OR items::text ILIKE $${n} OR coalesce(tracking,'') ILIKE $${n})`);
+  }
+  params.push(opts.limit ?? 200);
+  const where = conds.length ? `WHERE ${conds.join(" AND ")}` : "";
+  const rows = await query<OrderRow>(`SELECT * FROM orders ${where} ORDER BY created_at DESC LIMIT $${params.length}`, params);
+  return rows.map(toOrder);
+}
+
+export async function countOrdersByStatus() {
+  const rows = await query<{ status: OrderStatus; n: number }>("SELECT status, count(*)::int AS n FROM orders GROUP BY status");
+  const out: Record<OrderStatus, number> = { pendiente: 0, pagado: 0, despachado: 0, fallido: 0 };
+  for (const r of rows) out[r.status] = Number(r.n);
+  return out;
+}
+
+// Ventas cobradas (pagadas o despachadas): hoy, últimos 7 días, últimos 30 días y total histórico.
+export async function salesSummary() {
+  const rows = await query<{ periodo: string; n: number; total: number }>(`
+    SELECT periodo, count(*)::int AS n, coalesce(sum(total),0)::int AS total FROM (
+      SELECT total,
+        CASE WHEN paid_at >= date_trunc('day', now() AT TIME ZONE 'America/Santiago') AT TIME ZONE 'America/Santiago' THEN 'hoy'
+             WHEN paid_at >= now() - interval '7 days' THEN 'semana'
+             WHEN paid_at >= now() - interval '30 days' THEN 'mes'
+             ELSE 'antes' END AS periodo
+      FROM orders WHERE status IN ('pagado','despachado') AND paid_at IS NOT NULL
+    ) t GROUP BY periodo`);
+  const get = (k: string) => rows.find((r) => r.periodo === k) ?? { n: 0, total: 0 };
+  const hoy = get("hoy"), semana = get("semana"), mes = get("mes");
+  return {
+    hoy: { n: Number(hoy.n), total: Number(hoy.total) },
+    semana: { n: Number(hoy.n) + Number(semana.n), total: Number(hoy.total) + Number(semana.total) },
+    mes: { n: Number(hoy.n) + Number(semana.n) + Number(mes.n), total: Number(hoy.total) + Number(semana.total) + Number(mes.total) },
+    total: { n: rows.reduce((a, r) => a + Number(r.n), 0), total: rows.reduce((a, r) => a + Number(r.total), 0) },
+  };
+}
+
+// Productos más vendidos (por unidades) entre los pedidos cobrados de los últimos 90 días.
+export async function topProducts(limit = 5) {
+  const rows = await query<OrderRow>(
+    `SELECT * FROM orders WHERE status IN ('pagado','despachado') AND created_at >= now() - interval '90 days' ORDER BY created_at DESC LIMIT 500`,
+  );
+  const acc = new Map<string, { name: string; qty: number; total: number }>();
+  for (const o of rows.map(toOrder)) {
+    for (const it of o.items) {
+      const cur = acc.get(it.variantId) ?? { name: it.name, qty: 0, total: 0 };
+      cur.qty += it.qty;
+      cur.total += it.qty * it.unitPrice;
+      acc.set(it.variantId, cur);
+    }
+  }
+  return [...acc.entries()].map(([variantId, v]) => ({ variantId, ...v })).sort((a, b) => b.qty - a.qty).slice(0, limit);
+}

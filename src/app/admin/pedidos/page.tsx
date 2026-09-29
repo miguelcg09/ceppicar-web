@@ -1,43 +1,85 @@
-import { listOrders } from "@/lib/orders";
+import Link from "next/link";
+import { countOrdersByStatus, searchOrders, type OrderStatus } from "@/lib/orders";
 import { formatCLP } from "@/lib/products";
-import { removeOrder, saveOrderNote, shipOrder } from "../actions";
+import { markPaidManual, removeOrder, saveOrderNote, shipOrder } from "../actions";
 
 export const dynamic = "force-dynamic";
 
 const tone: Record<string, string> = {
   pagado: "bg-accent/15 text-accent",
   despachado: "bg-ok/15 text-ok",
-  pendiente: "bg-amber-400/15 text-amber-700 dark:text-amber-300",
-  fallido: "bg-red-500/15 text-red-600 dark:text-red-300",
+  pendiente: "bg-amber-400/15 text-amber-700",
+  fallido: "bg-red-500/15 text-red-600",
 };
 
-export default async function Pedidos({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
-  const { error } = await searchParams;
-  const orders = await listOrders(200);
+const tabs: { key: OrderStatus | "todos"; label: string }[] = [
+  { key: "todos", label: "Todos" },
+  { key: "pagado", label: "Por despachar" },
+  { key: "despachado", label: "Despachados" },
+  { key: "pendiente", label: "Pendientes de pago" },
+  { key: "fallido", label: "Fallidos" },
+];
+
+export default async function Pedidos({ searchParams }: { searchParams: Promise<{ error?: string; estado?: string; q?: string }> }) {
+  const { error, estado = "todos", q = "" } = await searchParams;
+  const status = (tabs.some((t) => t.key === estado) ? estado : "todos") as OrderStatus | "todos";
+  const [orders, counts] = await Promise.all([searchOrders({ status, q, limit: 300 }), countOrdersByStatus()]);
+  const total = Object.values(counts).reduce((a, b) => a + b, 0);
   const fmtDate = (iso: string) => new Date(iso).toLocaleString("es-CL", { timeZone: "America/Santiago" });
+  const href = (patch: Record<string, string>) => {
+    const s = new URLSearchParams();
+    for (const [k, v] of Object.entries({ estado: status, q, ...patch })) if (v && v !== "todos") s.set(k, v);
+    const qs = s.toString();
+    return `/admin/pedidos${qs ? `?${qs}` : ""}`;
+  };
 
   return (
     <div>
-      <h1 className="font-display text-3xl font-bold">Pedidos</h1>
-      <p className="mt-1 text-sm text-muted">{orders.length} pedidos, del más reciente al más antiguo.</p>
-      {error && <p className="mt-4 rounded-lg bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">La clave no es válida.</p>}
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="font-display text-3xl font-bold">Pedidos</h1>
+          <p className="mt-1 text-sm text-muted">{total} pedidos en total · {counts.pagado} por despachar.</p>
+        </div>
+        <a href={`/admin/pedidos/exportar?estado=${status}&q=${encodeURIComponent(q)}`} className="btn-ghost text-sm">Descargar CSV</a>
+      </div>
+      {error && <p className="mt-4 rounded-lg bg-red-500/10 p-3 text-sm text-red-700">La clave no es válida.</p>}
+
+      {/* Pestañas por estado y buscador */}
+      <div className="mt-6 flex flex-wrap items-center gap-2">
+        {tabs.map((t) => {
+          const n = t.key === "todos" ? total : counts[t.key];
+          return (
+            <Link key={t.key} href={href({ estado: t.key })} className={`rounded-full border px-3 py-1.5 text-sm ${status === t.key ? "border-accent bg-accent text-on-accent" : "hover:border-accent"}`}>
+              {t.label} <span className="opacity-70">{n}</span>
+            </Link>
+          );
+        })}
+        <form className="ml-auto flex gap-2">
+          {status !== "todos" && <input type="hidden" name="estado" value={status} />}
+          <input name="q" defaultValue={q} placeholder="Buscar por número, nombre, correo o RUT" className="field mt-0 w-72 py-2 text-sm" />
+          <button className="btn-ghost py-2 text-sm">Buscar</button>
+        </form>
+      </div>
+
       {orders.length === 0 ? (
-        <p className="mt-10 text-muted">Todavía no hay pedidos.</p>
+        <p className="mt-10 text-muted">{q || status !== "todos" ? "No hay pedidos con ese filtro." : "Todavía no hay pedidos."}</p>
       ) : (
-        <div className="mt-8 space-y-3">
+        <div className="mt-6 space-y-3">
           {orders.map((o) => {
             const deletable = o.paymentRef === "modo-prueba" || o.status === "pendiente" || o.status === "fallido";
             const retiro = o.customer.delivery === "retiro";
             return (
-              <details key={o.id} className="rounded-2xl border bg-surface">
+              <details key={o.id} className="rounded-2xl border bg-surface" open={status === "pagado"}>
                 <summary className="flex cursor-pointer list-none flex-wrap items-center gap-x-4 gap-y-1 px-5 py-4 text-sm">
                   <span className="font-mono font-semibold">{o.id}</span>
                   <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${tone[o.status]}`}>
-                    {o.status === "despachado" && retiro ? "listo para retiro" : o.status}
+                    {o.status === "despachado" && retiro ? "listo para retiro" : o.status === "pagado" ? "pagado · por despachar" : o.status}
                   </span>
                   {retiro && <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs">Retiro</span>}
+                  {o.customer.invoice && <span className="rounded-full bg-surface-2 px-2 py-0.5 text-xs">Factura</span>}
                   <span className="text-muted">{fmtDate(o.createdAt)}</span>
                   <span className="grow">{o.customer.name}</span>
+                  <span className="text-muted">{o.items.reduce((a, i) => a + i.qty, 0)} u.</span>
                   <span className="font-semibold tabular">{formatCLP(o.total)}</span>
                 </summary>
                 <div className="grid gap-6 border-t px-5 py-4 text-sm md:grid-cols-2">
@@ -45,12 +87,12 @@ export default async function Pedidos({ searchParams }: { searchParams: Promise<
                     <p className="font-semibold">Cliente</p>
                     <p className="mt-1 text-muted">
                       {o.customer.name} · RUT {o.customer.rut}<br />
-                      {o.customer.email} · {o.customer.phone}<br />
+                      <a href={`mailto:${o.customer.email}`} className="hover:underline">{o.customer.email}</a> · <a href={`https://wa.me/${o.customer.phone.replace(/\D/g, "")}`} target="_blank" rel="noopener" className="hover:underline">{o.customer.phone}</a><br />
                       {retiro ? "Retira en tienda" : `${o.customer.address}, ${o.customer.comuna}, ${o.customer.region}`}
                     </p>
                     {o.customer.vehicle && <p className="mt-2 text-xs text-muted">Vehículo: <strong className="text-fg">{o.customer.vehicle}</strong></p>}
                     <p className="mt-1 text-xs text-muted">Documento: {o.customer.invoice ? <strong className="text-fg">Factura · {o.customer.invoice}</strong> : "Boleta"}</p>
-                    {o.paymentRef && <p className="mt-2 text-xs text-muted">Ref. pago: {o.paymentRef}</p>}
+                    {o.paymentRef && <p className="mt-2 text-xs text-muted">Ref. pago: {o.paymentRef}{o.paidAt && ` · ${fmtDate(o.paidAt)}`}</p>}
                     {o.status === "despachado" && (
                       <p className="mt-2 text-xs text-muted">
                         {retiro ? "Listo" : "Despachado"} {o.shippedAt && fmtDate(o.shippedAt)}
@@ -79,6 +121,17 @@ export default async function Pedidos({ searchParams }: { searchParams: Promise<
                         <input name="tracking" required={!retiro} placeholder={retiro ? "Ej: lunes a viernes de 10 a 18 h" : "Ej: 123456789"} className="field" />
                       </label>
                       <button className="btn-primary text-sm">{retiro ? "Marcar listo y avisar al cliente" : "Marcar despachado y avisar al cliente"}</button>
+                    </form>
+                  )}
+
+                  {(o.status === "pendiente" || o.status === "fallido") && (
+                    <form action={markPaidManual} className="flex flex-wrap items-end gap-2 rounded-xl border border-amber-300 bg-amber-400/10 p-3 md:col-span-2">
+                      <input type="hidden" name="id" value={o.id} />
+                      <label className="grow text-xs text-muted">
+                        ¿Te pagó por transferencia o en la tienda? Anota la referencia y márcalo pagado; el cliente recibe el correo de confirmación.
+                        <input name="ref" placeholder="Ej: transferencia 29/09, comprobante 4532" className="field" />
+                      </label>
+                      <button className="btn-cta text-sm">Marcar como pagado</button>
                     </form>
                   )}
 

@@ -30,6 +30,12 @@ export default async function Ajustes({ searchParams }: { searchParams: Promise<
           <p className="text-xs text-muted sm:col-span-2">Los productos marcados con “Envío gratis” no cobran envío aunque el pedido no llegue al mínimo. El retiro en tienda siempre es gratis.</p>
         </fieldset>
 
+        <fieldset className="grid gap-4 sm:grid-cols-2">
+          <legend className="mb-2 font-semibold">Inventario</legend>
+          <label className="text-sm">Avisar “stock bajo” con (unidades o menos)<input name="lowStock" type="number" min={0} defaultValue={s.lowStock} className="field" /></label>
+          <p className="text-xs text-muted sm:col-span-2">El Resumen y la lista de productos marcan en amarillo las opciones con ese stock o menos, y en rojo las agotadas.</p>
+        </fieldset>
+
         <fieldset className="space-y-4">
           <legend className="mb-2 font-semibold">Textos legales</legend>
           <label className="block text-sm">Garantía (aparece en fichas, correos y pie de página)

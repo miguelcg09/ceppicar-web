@@ -4,10 +4,11 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/admin";
 import { categories, slugify, type Category, type Product, type Variant } from "@/lib/products";
-import { deleteProduct, setProductVisible, setVariants, upsertProduct } from "@/lib/catalog";
-import { deleteOrder, getOrder, markShipped, setOrderNote } from "@/lib/orders";
+import { bulkAdjustPrices, bulkDeleteProducts, bulkUpdateProducts, deleteProduct, setProductVisible, setVariants, updateVariantQuick, upsertProduct } from "@/lib/catalog";
+import { deleteOrder, getOrder, markPaid, markShipped, setOrderNote } from "@/lib/orders";
+import { applyMlImport, parseMlWorkbook } from "@/lib/ml-import";
 import { getSettings, saveSettings } from "@/lib/settings";
-import { sendShippedEmail } from "@/lib/email";
+import { sendOrderEmails, sendShippedEmail } from "@/lib/email";
 import type { Settings } from "@/lib/config";
 
 const str = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
@@ -148,8 +149,87 @@ export async function saveSettingsAction(form: FormData) {
     freeShippingFrom: num(form, "freeShippingFrom"),
     warranty: str(form, "warranty"),
     terminos: String(form.get("terminos") ?? "").trim(),
+    lowStock: num(form, "lowStock", 2),
   };
   await saveSettings(patch);
   refreshStore();
   redirect("/admin/ajustes?guardado=1");
+}
+
+// Edición rápida de precio y stock desde la lista de productos.
+export async function quickVariantAction(form: FormData) {
+  await requireAdmin();
+  const id = str(form, "id");
+  const price = num(form, "price", 0);
+  if (!id || price <= 0) throw new Error("Precio inválido");
+  const stock = str(form, "stock") === "" ? null : Math.max(0, num(form, "stock", 0));
+  await updateVariantQuick(id, price, stock);
+  refreshStore();
+}
+
+// Acciones en lote: los productos marcados con la casilla y la operación elegida.
+export async function bulkProductsAction(form: FormData) {
+  await requireAdmin();
+  const slugs = form.getAll("slug").map(String).filter(Boolean);
+  const op = str(form, "op");
+  const back = str(form, "back") || "/admin/productos";
+  if (!slugs.length) redirect(`${back}${back.includes("?") ? "&" : "?"}aviso=${encodeURIComponent("Marca al menos un producto")}`);
+  let aviso = "";
+  switch (op) {
+    case "mostrar": await bulkUpdateProducts(slugs, { visible: true }); aviso = `${slugs.length} productos ahora visibles`; break;
+    case "ocultar": await bulkUpdateProducts(slugs, { visible: false }); aviso = `${slugs.length} productos ocultos`; break;
+    case "destacar": await bulkUpdateProducts(slugs, { featured: true }); aviso = `${slugs.length} productos destacados en el inicio`; break;
+    case "nodestacar": await bulkUpdateProducts(slugs, { featured: false }); aviso = `${slugs.length} productos ya no están destacados`; break;
+    case "envio": await bulkUpdateProducts(slugs, { freeShipping: true }); aviso = `Envío gratis activado en ${slugs.length} productos`; break;
+    case "noenvio": await bulkUpdateProducts(slugs, { freeShipping: false }); aviso = `Envío gratis quitado en ${slugs.length} productos`; break;
+    case "precio": {
+      const pct = Number(String(form.get("pct") ?? "").replace(",", "."));
+      if (!Number.isFinite(pct) || pct === 0 || pct <= -100) { aviso = "Escribe un porcentaje válido, por ejemplo 5 o -10"; break; }
+      const n = await bulkAdjustPrices(slugs, pct);
+      aviso = `${n} precios ${pct > 0 ? "subidos" : "bajados"} un ${Math.abs(pct)}%`;
+      break;
+    }
+    case "borrar": await bulkDeleteProducts(slugs); aviso = `${slugs.length} productos borrados`; break;
+    default: aviso = "Elige una acción";
+  }
+  refreshStore();
+  redirect(`${back}${back.includes("?") ? "&" : "?"}aviso=${encodeURIComponent(aviso)}`);
+}
+
+// Marca como pagado un pedido pendiente (transferencia, pago en tienda…) y envía los correos de confirmación.
+export async function markPaidManual(form: FormData) {
+  await requireAdmin();
+  const id = str(form, "id");
+  const ref = str(form, "ref") || "manual";
+  const order = await markPaid(id, ref);
+  if (order) await sendOrderEmails(order, await getSettings());
+  revalidatePath("/admin/pedidos");
+}
+
+// Importa el Excel de publicaciones de Mercado Libre y guarda el resumen en la URL para mostrarlo.
+export async function importMlAction(form: FormData) {
+  await requireAdmin();
+  const file = form.get("archivo");
+  if (!(file instanceof File) || file.size === 0) redirect("/admin/mercadolibre?error=" + encodeURIComponent("Elige el archivo .xlsx descargado desde Mercado Libre"));
+  let summary: string;
+  try {
+    const rows = parseMlWorkbook(await file.arrayBuffer());
+    const res = await applyMlImport(rows, { syncVisibility: form.get("visibilidad") === "on", createNew: form.get("crear") === "on" });
+    summary = JSON.stringify({ ...res, nuevos: res.nuevos.slice(0, 40) });
+  } catch (e) {
+    redirect("/admin/mercadolibre?error=" + encodeURIComponent(e instanceof Error ? e.message : "No se pudo leer el archivo"));
+  }
+  refreshStore();
+  redirect("/admin/mercadolibre?resultado=" + encodeURIComponent(summary));
+}
+
+// Trae las fotos de las publicaciones de Mercado Libre para los productos que aún usan la ilustración.
+export async function fetchMlPhotosAction(form: FormData) {
+  await requireAdmin();
+  const { fetchPhotosBatch } = await import("@/lib/ml-fotos");
+  const onlyVisible = form.get("alcance") !== "todos";
+  const res = await fetchPhotosBatch(20, onlyVisible, form.get("reintentar") === "on");
+  refreshStore();
+  const summary = JSON.stringify({ intentados: res.intentados, encontradas: res.encontradas, fallidos: res.fallidos.slice(0, 10).map((f) => `${f.mlId}: ${f.error}`) });
+  redirect(`/admin/mercadolibre?fotos=${encodeURIComponent(summary)}&alcance=${onlyVisible ? "visibles" : "todos"}`);
 }

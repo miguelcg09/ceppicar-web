@@ -175,3 +175,58 @@ export async function decrementStock(items: { variantId: string; qty: number }[]
     await query("UPDATE variants SET stock = GREATEST(stock - $2, 0) WHERE id = $1 AND stock IS NOT NULL", [it.variantId, it.qty]);
   }
 }
+
+// Edición rápida desde la lista: precio y stock de una opción.
+export async function updateVariantQuick(id: string, price: number, stock: number | null) {
+  await query("UPDATE variants SET price = $2, stock = $3 WHERE id = $1", [id, price, stock]);
+}
+
+// Acciones en lote sobre varios productos (mostrar, ocultar, destacar, envío gratis…).
+export async function bulkUpdateProducts(slugs: string[], patch: Partial<Pick<Product, "visible" | "featured" | "freeShipping" | "active">>) {
+  if (!slugs.length) return;
+  const sets: string[] = [];
+  const params: unknown[] = [slugs];
+  const map: Record<string, string> = { visible: "visible", featured: "featured", freeShipping: "free_shipping", active: "active" };
+  for (const [k, v] of Object.entries(patch)) {
+    if (v === undefined) continue;
+    params.push(v);
+    sets.push(`${map[k]} = $${params.length}`);
+  }
+  if (!sets.length) return;
+  await query(`UPDATE products SET ${sets.join(", ")} WHERE slug = ANY($1::text[])`, params);
+}
+
+// Sube o baja los precios de varios productos en un porcentaje, redondeando a los $10 más cercanos.
+export async function bulkAdjustPrices(slugs: string[], percent: number) {
+  if (!slugs.length || !percent) return 0;
+  const rows = await query<{ n: number }>(
+    `WITH u AS (
+       UPDATE variants SET price = GREATEST(10, round(price * (1 + $2::numeric / 100) / 10) * 10)::int
+       WHERE product_slug = ANY($1::text[]) RETURNING 1
+     ) SELECT count(*)::int AS n FROM u`,
+    [slugs, percent],
+  );
+  return Number(rows[0]?.n ?? 0);
+}
+
+export async function bulkDeleteProducts(slugs: string[]) {
+  if (!slugs.length) return;
+  await query("DELETE FROM products WHERE slug = ANY($1::text[])", [slugs]);
+}
+
+// Resumen de inventario para el panel.
+export async function stockSummary(lowStock: number) {
+  const [r] = await query<{ visibles: number; ocultos: number; agotados: number; bajos: number; sin_ml: number; sin_foto: number; activos_ml: number }>(
+    `SELECT
+       count(*) FILTER (WHERE visible)::int AS visibles,
+       count(*) FILTER (WHERE NOT visible)::int AS ocultos,
+       count(*) FILTER (WHERE visible AND EXISTS (SELECT 1 FROM variants v WHERE v.product_slug = p.slug AND v.stock = 0))::int AS agotados,
+       count(*) FILTER (WHERE visible AND EXISTS (SELECT 1 FROM variants v WHERE v.product_slug = p.slug AND v.stock > 0 AND v.stock <= $1))::int AS bajos,
+       count(*) FILTER (WHERE visible AND ml_id = '')::int AS sin_ml,
+       count(*) FILTER (WHERE visible AND image_url IS NULL)::int AS sin_foto,
+       count(*) FILTER (WHERE active)::int AS activos_ml
+     FROM products p`,
+    [lowStock],
+  );
+  return { visibles: Number(r.visibles), ocultos: Number(r.ocultos), agotados: Number(r.agotados), bajos: Number(r.bajos), sinMl: Number(r.sin_ml), sinFoto: Number(r.sin_foto), activosMl: Number(r.activos_ml) };
+}

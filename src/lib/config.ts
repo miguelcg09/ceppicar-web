@@ -6,6 +6,7 @@ export type Settings = {
   whatsapp: string;
   address: string; // dirección de retiro
   mlUrl: string; // tienda oficial "Repuestos Ceppicar" en Mercado Libre
+  lowStock: number; // desde cuántas unidades (o menos) se avisa "stock bajo" en el panel
   shippingCost: number; // CLP
   freeShippingFrom: number; // CLP
   warranty: string; // texto de garantía (fichas, checkout, correos y pie de página)
@@ -19,6 +20,7 @@ export const defaultSettings: Settings = {
   whatsapp: "+56 9 0000 0000",
   address: "La Cisterna, Santiago (retiro con previa coordinación)",
   mlUrl: "https://www.mercadolibre.cl/pagina/repuestosceppicar",
+  lowStock: 2,
   shippingCost: 5990,
   freeShippingFrom: 40000,
   warranty:

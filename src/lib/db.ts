@@ -88,6 +88,11 @@ CREATE TABLE IF NOT EXISTS variants (
   sort         INTEGER NOT NULL DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS variants_product ON variants (product_slug);
+ALTER TABLE products ADD COLUMN IF NOT EXISTS photo_checked_at TIMESTAMPTZ;
+CREATE TABLE IF NOT EXISTS kv (
+  key   TEXT PRIMARY KEY,
+  value JSONB NOT NULL
+);
 CREATE TABLE IF NOT EXISTS settings (
   key   TEXT PRIMARY KEY,
   value JSONB NOT NULL
